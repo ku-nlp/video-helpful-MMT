@@ -23,8 +23,8 @@ Splits:
 
 | Split      | Train     | Validation     | test     |
 | ---------- | :-----------:  | :-----------: | :-----------: |
-|#sample (Ja-En)| 848,164 | 2,138 | 2,138 |
-|#sample (Zh-En) 516,733 | 1,470 | 1,470 |
+|#sample (Ja-En) | 848,164 | 2,138 | 2,138 |
+|#sample (Zh-En) | 516,733 | 1,470 | 1,470 |
 |video-helpful | | ✓ | ✓ |
 
 Usage:
