@@ -15,7 +15,8 @@ NMT: Beautiful
 
 VMT: You look beautiful
 
-![You look beautiful](https://user-images.githubusercontent.com/38623473/160537899-a5085b99-d3f4-49aa-a5c2-df33c984c2f3.gif)
+![opus_1224479_305](https://github.com/ku-nlp/video-helpful-MMT/assets/38623473/d5b849c4-6535-41ec-b32b-6a882f40a621)
+
 
 Splits:
 -------------------
