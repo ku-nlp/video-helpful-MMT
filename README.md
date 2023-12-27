@@ -1,7 +1,7 @@
 Video-Helpful Multimodal Machine Translation
 ==========
 
-__EVA__ is a dataset that contains 852k Japanese-English (Ja-En) parallel subtitle pairs, 520k Chinese-English (Zh-En) parallel subtitle pairs, and corresponding video clips collected from movies and TV episodes: 
+__EVA__ is a dataset that contains 852k Japanese-English parallel subtitle pairs, 520k Chinese-English parallel subtitle pairs, and corresponding video clips collected from movies and TV episodes: 
   - Extensive training set
   - Video-helpful evaluation set in which subtitles are ambiguous, and videos can help disambiguate the source subtitles
     
@@ -25,7 +25,7 @@ Splits:
 | ---------- | :-----------:  | :-----------: | :-----------: |
 |#sample (Ja-En)| 848,164 | 2,138 | 2,138 |
 |#sample (Zh-En) 516,733 | 1,470 | 1,470 |
-|video-helpful | ✓ | ✓ |
+|video-helpful | | ✓ | ✓ |
 
 Usage:
 -------------------
