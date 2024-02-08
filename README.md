@@ -42,6 +42,10 @@ Json Files Structure:
 }
 ```
 
+Download:
+-------------------
+Considering the copyright of the included videos, we're unable to directly provide download links. However, if you're interested in accessing the dataset, please kindly send an email to l763541405@gmail.com. By the way, please include your academic affiliation in the email, and we'll respond as soon as possible.
+
 Note:
 -------------------
 Please, note that by downloading the dataset, you agree to the following conditions:
