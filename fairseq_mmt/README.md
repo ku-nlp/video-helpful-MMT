@@ -31,12 +31,10 @@ bash train_mmt_video.sh
 ```
 
 ### SAFA
+Example:
 ```
 bash train_mmt_video_gaussian.sh 0,1 0.5 0.5 0
 ```
-
-The definitions of different parameters are provided within the respective `.sh` files.
-
 
 ## 5. Evaluation
 ### NMT model
