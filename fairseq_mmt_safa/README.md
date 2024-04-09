@@ -4,7 +4,7 @@
 **Note:** For installation and usage of the project, it is recommended to refer to https://github.com/libeineu/fairseq_mmt which is our base
 
 ## 1. Python Environment
-The conda environment file `./env/environment.yaml` contains a list of packages. However, not all of these packages are necessary, as some may have been used for other experiments and are included for reference purposes only.
+The conda environment file `./env/environment.yaml` contains a list of packages. However, not all of these packages are necessary, as some may have been used for other experiments and are included for reference purpose only.
 
 ## 2. Prepare Required Data
 Create a folder under `./data` and place your training data there. Ensure that the data has been tokenized.
