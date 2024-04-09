@@ -1,9 +1,9 @@
-# fairseq_mmt/fairseq/data/image_dataset.py to set feat dataloader
+# fairseq_mmt_safa/fairseq/data/image_dataset.py to set feat dataloader
 
 # codes have been edited:
-# fairseq_mmt/fairseq/data/image_dataset.py
-# fairseq_mmt/fairseq/tasks/image_multimodal_translation.py
-# fairseq_mmt/fairseq/data/image_language_pair_dataset.py
+# fairseq_mmt_safa/fairseq/data/image_dataset.py
+# fairseq_mmt_safa/fairseq/tasks/image_multimodal_translation.py
+# fairseq_mmt_safa/fairseq/data/image_language_pair_dataset.py
 
 
 # set before using:
@@ -105,7 +105,7 @@ cp ${BASH_SOURCE[0]} $save_dir/train.sh
 
 gpu_num=`echo "$device" | awk '{split($0,arr,",");print length(arr)}'`
 
-# export PYTHONPATH=$PYTHONPATH:/home/code/fairseq_mmt/fairseq
+# export PYTHONPATH=$PYTHONPATH:/home/code/fairseq_mmt_safa/fairseq
 # echo $PYTHONPATH
 #   --user-dir fairseq/tasks
 #   --share-all-embeddings

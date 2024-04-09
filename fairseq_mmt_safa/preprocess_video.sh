@@ -4,7 +4,7 @@ tgt='en'
 TEXT=data/opus-$src-$tgt-context
 
 # In text, each line is a sentence
-rm -rf /home/code/fairseq_mmt/data-bin/opus.zh-en-context
+rm -rf /home/code/fairseq_mmt_safa/data-bin/opus.zh-en-context
 
 fairseq-preprocess --source-lang $src --target-lang $tgt \
   --trainpref $TEXT/train \

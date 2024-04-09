@@ -1,3 +1,14 @@
+# fairseq_mmt_safa/fairseq/data/image_dataset.py to set feat dataloader
+
+# codes have been edited:
+# fairseq_mmt_safa/fairseq/data/image_dataset.py
+# fairseq_mmt_safa/fairseq/tasks/image_multimodal_translation.py
+# fairseq_mmt_safa/fairseq/data/image_language_pair_dataset.py
+
+
+# set before using:
+# device, image_feat, max_tokens, image_dataset.py->random.shuffle
+
 #! /usr/bin/bash
 set -e
 
@@ -7,11 +18,13 @@ device=$1
 patience=20
 max_tokens=4000 # for c4c
 fp16=0 #0
-lambda=0.5
+lambda=$2
 inverse_T=1
-weight=0.5
-order=$2
-image_feat=c4c_w${weight}_l${lambda}_it${inverse_T}_weighted_gaussian_dist2_context_${order}
+weight=$3
+order=$4
+# image_feat=c4c_l${lambda}_it${inverse_T}_w${weight}_random_${order}
+image_feat=c4c_w${weight}_l${lambda}_it${inverse_T}_weighted_gaussian_dist2_${order}
+# image_feat=c4c_w${weight}_dist2_${order}
 
 task=opus-ja2en
 mask_data=mask0
@@ -25,11 +38,23 @@ fi
 if [ $task == 'opus-ja2en' ]; then
 	src_lang=ja
 	tgt_lang=en
-	data_dir=opus.ja-en-context
+	data_dir=opus.ja-en
+elif [ $task == 'opus-random-ja2en' ]; then
+	src_lang=ja
+	tgt_lang=en
+	data_dir=opus-random.ja-en
+elif [ $task == 'transet-ja2en' ]; then
+	src_lang=ja
+	tgt_lang=en
+	data_dir=transet.ja-en
+elif [ $task == 'opus-zh2en' ]; then
+	src_lang=zh
+	tgt_lang=en
+	data_dir=opus.zh-en
 fi
 
 decrease=0
-criterion=label_smoothed_cross_entropy_with_gaussian_context
+criterion=label_smoothed_cross_entropy_with_gaussian
 amp=0
 lr=0.005
 warmup=2000
@@ -65,8 +90,12 @@ elif [[ $image_feat == *"i3d"* ]] ; then
 	image_feat_dim=2048 # (32, 2048)
 	image_feat_whole_dim="32 2048" # (32, 2048)
 elif [[ $image_feat == *"c4c"* ]]; then
-	image_feat_path=/data/OpusEJ_c4c_feature
-# 	image_feat_path=/dataset/OpusEJ/OpusEJ_c4c_feature
+	if [[ $src_lang == "ja" ]]; then # ==前后要有空格
+		image_feat_path=/data/OpusEJ_c4c_feature
+	elif [[ $src_lang == "zh" ]]; then
+		image_feat_path=/data/OpusZE_c4c_feature
+	fi
+	echo "image_feat_path=$image_feat_path"
 	image_feat_dim=512
 	image_feat_whole_dim="12 512" # (12, 512)
 elif [[ $image_feat == *"videoMAE"* ]]; then
@@ -86,7 +115,7 @@ cp ${BASH_SOURCE[0]} $save_dir/train.sh
 
 gpu_num=`echo "$device" | awk '{split($0,arr,",");print length(arr)}'`
 
-# export PYTHONPATH=$PYTHONPATH:/home/code/fairseq_mmt/fairseq
+# export PYTHONPATH=$PYTHONPATH:/home/code/fairseq_mmt_safa/fairseq
 # echo $PYTHONPATH
 #   --user-dir fairseq/tasks
 #   --share-all-embeddings
@@ -132,3 +161,5 @@ export CUDA_VISIBLE_DEVICES=$device
 cmd="nohup "${cmd}" > $save_dir/train.log 2>&1 &"
 eval $cmd
 tail -f $save_dir/train.log
+
+

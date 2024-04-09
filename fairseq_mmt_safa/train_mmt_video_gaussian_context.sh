@@ -1,25 +1,19 @@
-# fairseq_mmt/fairseq/data/image_dataset.py to set feat dataloader
-
-# codes have been edited:
-# fairseq_mmt/fairseq/data/image_dataset.py
-# fairseq_mmt/fairseq/tasks/image_multimodal_translation.py
-# fairseq_mmt/fairseq/data/image_language_pair_dataset.py
-
-
-# set before using:
-# device, image_feat, max_tokens, image_dataset.py->random.shuffle
-
 #! /usr/bin/bash
 set -e
 
 # device=0,1,2,3,4,5,6,7
-device=2,3
-image_feat=detr_5
+device=$1
+# image_feat=i3d1
 patience=20
-max_tokens=8000
+max_tokens=4000 # for c4c
 fp16=0 #0
+lambda=0.5
+inverse_T=1
+weight=0.5
+order=$2
+image_feat=c4c_w${weight}_l${lambda}_it${inverse_T}_weighted_gaussian_dist2_context_${order}
 
-task=opus-zh2en
+task=opus-ja2en
 mask_data=mask0
 tag=$image_feat/$image_feat-$mask_data
 save_dir=checkpoints/$task/$tag
@@ -28,21 +22,14 @@ if [ ! -d $save_dir ]; then
         mkdir -p $save_dir
 fi
 
-if [ $task == 'opus-random-ja2en' ]; then
+if [ $task == 'opus-ja2en' ]; then
 	src_lang=ja
 	tgt_lang=en
-	data_dir=opus-random.ja-en
-elif [ $task == 'opus-zh2en' ]; then
-	src_lang=zh
-	tgt_lang=en
-	data_dir=opus.zh-en
-elif [ $task == 'opus-ja2en' ]; then
-	src_lang=ja
-	tgt_lang=en
-	data_dir=opus.ja-en
+	data_dir=opus.ja-en-context
 fi
 
-criterion=label_smoothed_cross_entropy
+decrease=0
+criterion=label_smoothed_cross_entropy_with_gaussian_context
 amp=0
 lr=0.005
 warmup=2000
@@ -69,16 +56,17 @@ elif [ $image_feat == "vit_large_patch16_384" ]; then
 	image_feat_dim=1024
 elif [[ $image_feat == *"i3d"* ]] ; then
 # 	image_feat_path=/dataset/OpusEJ/OpusEJ_i3d_feature
-	image_feat_path=/data/OpusEJ_i3d_feature
+	if [[ $HOSTNAME == agni  ]]; then
+		image_feat_path=/data/OpusEJ_i3d_feature
+		echo "image_feat_path=$image_feat_path"
+	else
+		image_feat_path=/home/dataset/OpusEJ_i3d_feature
+	fi
 	image_feat_dim=2048 # (32, 2048)
 	image_feat_whole_dim="32 2048" # (32, 2048)
 elif [[ $image_feat == *"c4c"* ]]; then
-	if [[ $src_lang == "ja" ]]; then # ==前后要有空格
-		image_feat_path=/data/OpusEJ_c4c_feature
-	elif [[ $src_lang == "zh" ]]; then
-		image_feat_path=/data/OpusZE_c4c_feature
-	fi
-	echo "image_feat_path=$image_feat_path"
+	image_feat_path=/data/OpusEJ_c4c_feature
+# 	image_feat_path=/dataset/OpusEJ/OpusEJ_c4c_feature
 	image_feat_dim=512
 	image_feat_whole_dim="12 512" # (12, 512)
 elif [[ $image_feat == *"videoMAE"* ]]; then
@@ -88,22 +76,6 @@ elif [[ $image_feat == *"videoMAE"* ]]; then
 	fi
 	image_feat_dim=384
 	image_feat_whole_dim="1568 384" # (1568, 384)
-elif [[ $image_feat == *"videoMAE"* ]]; then
-	if [[ $HOSTNAME == agni  ||  $HOSTNAME == kubera  ||  $HOSTNAME == saffron4 ||  $HOSTNAME == saffron ||  $HOSTNAME == moss110 ]]; then
-		image_feat_path=/data/OpusEJ_videoMAE_feature_224
-		echo "image_feat_path=$image_feat_path"
-	fi
-	image_feat_dim=384
-	image_feat_whole_dim="1568 384" # (1568, 384)
-elif [[ $image_feat == *"detr"* ]]; then
-	if [[ $src_lang == "ja" ]]; then # ==前后要有空格
-		image_feat_path=/data/OpusEJ_central_frame_detr_feature
-	elif [[ $src_lang == "zh" ]]; then
-		image_feat_path=/data/OpusZE_central_frame_detr_feature
-	fi
-	echo "image_feat_path=$image_feat_path"
-	image_feat_dim=256
-	image_feat_whole_dim="100 256" # (1568, 384)
 fi
 
 # multi-feature
@@ -114,7 +86,7 @@ cp ${BASH_SOURCE[0]} $save_dir/train.sh
 
 gpu_num=`echo "$device" | awk '{split($0,arr,",");print length(arr)}'`
 
-# export PYTHONPATH=$PYTHONPATH:/home/code/fairseq_mmt/fairseq
+# export PYTHONPATH=$PYTHONPATH:/home/code/fairseq_mmt_safa/fairseq
 # echo $PYTHONPATH
 #   --user-dir fairseq/tasks
 #   --share-all-embeddings
@@ -124,12 +96,13 @@ gpu_num=`echo "$device" | awk '{split($0,arr,",");print length(arr)}'`
 #   --load-checkpoint-on-all-dp-ranks
 #   --data-buffer-size 1
 #   --restore-file checkpoints/opus-ja2en/i3d/i3d-mask0/checkpoint_best.pt
+#   --keep-best-epochs $keep_last_epochs
 cmd="fairseq-train data-bin/$data_dir
   --save-dir $save_dir
   --distributed-world-size $gpu_num -s $src_lang -t $tgt_lang
   --arch $arch
   --dropout $dropout
-  --criterion $criterion --label-smoothing 0.1
+  --criterion $criterion --label-smoothing 0.1 --balancing-lambda $lambda --inverse-softmax-tempreature $inverse_T --decrease-addictive-object $decrease --weight $weight
   --task image_mmt --image-feat-path $image_feat_path --image-feat-dim $image_feat_dim
   --image-feat-whole-dim $image_feat_whole_dim
   --optimizer adam --adam-betas '(0.9, 0.98)'
@@ -138,8 +111,7 @@ cmd="fairseq-train data-bin/$data_dir
   --patience $patience
   --keep-last-epochs $keep_last_epochs
   --num-workers 2
-  --log-interval 20
-  --reset-optimizer"
+  --log-interval 20"
 
 if [ $fp16 -eq 1 ]; then
 cmd=${cmd}" --fp16 "
@@ -160,5 +132,3 @@ export CUDA_VISIBLE_DEVICES=$device
 cmd="nohup "${cmd}" > $save_dir/train.log 2>&1 &"
 eval $cmd
 tail -f $save_dir/train.log
-
-

@@ -1,6 +1,6 @@
 # extract image feature via DETR
 
-# python3 ~/code/fairseq_mmt/scripts/get_img_feat_detr_opus.py --ipath /OpusZE_central_frame --opath /OpusZE_central_frame_detr_feature
+# python3 ~/code/fairseq_mmt_safa/scripts/get_img_feat_detr_opus.py --ipath /OpusZE_central_frame --opath /OpusZE_central_frame_detr_feature
 import torch
 from PIL import Image
 import torchvision.transforms as T

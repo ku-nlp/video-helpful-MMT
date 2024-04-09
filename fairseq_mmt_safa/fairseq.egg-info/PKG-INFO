@@ -25,7 +25,7 @@ This code repository is for the accepted ACL2022 paper "On Vision Features in Mu
 # Install fairseq
 
 ```bash
-cd fairseq_mmt
+cd fairseq_mmt_safa
 pip install --editable ./
 ```
 
@@ -34,7 +34,7 @@ Multi30k data from [here](https://github.com/multi30k/dataset) and [here](https:
 flickr30k entities data from [here](https://github.com/BryanPlummer/flickr30k_entities)  
 Here, We get multi30k text data from [Revisit-MMT](https://github.com/LividWo/Revisit-MMT)
 ```bash
-cd fairseq_mmt
+cd fairseq_mmt_safa
 git clone https://github.com/BryanPlummer/flickr30k_entities.git
 cd flickr30k_entities
 unzip annotations.zip
@@ -68,7 +68,7 @@ pip3 install stanfordcorenlp
 wget https://nlp.stanford.edu/software/stanford-corenlp-latest.zip
 unzip stanford-corenlp-latest.zip
 
-cd fairseq_mmt
+cd fairseq_mmt_safa
 cat data/multi30k/train.en data/multi30k/valid.en data/multi30k/test.2016.en > train_val_test2016.en
 python3 get_and_record_noun_from_f30k_entities.py # recording noun and nouns position in each sentence by flickr30k_entities
 python3 record_color_people_position.py

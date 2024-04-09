@@ -1,9 +1,9 @@
-# fairseq_mmt/fairseq/data/image_dataset.py to set feat dataloader
+# fairseq_mmt_safa/fairseq/data/image_dataset.py to set feat dataloader
 
 # codes have been edited:
-# fairseq_mmt/fairseq/data/image_dataset.py
-# fairseq_mmt/fairseq/tasks/image_multimodal_translation.py
-# fairseq_mmt/fairseq/data/image_language_pair_dataset.py
+# fairseq_mmt_safa/fairseq/data/image_dataset.py
+# fairseq_mmt_safa/fairseq/tasks/image_multimodal_translation.py
+# fairseq_mmt_safa/fairseq/data/image_language_pair_dataset.py
 
 
 # set before using:
@@ -13,20 +13,15 @@
 set -e
 
 # device=0,1,2,3,4,5,6,7
+# device=0,1,2,3
 device=$1
-# image_feat=i3d1
+# device=0
+order=$2
+task=opus-zh2en
+# image_feat=videoMAE
+image_feat=nmt_context_${order}
 patience=20
-max_tokens=4000 # for c4c
-fp16=0 #0
-lambda=$2
-inverse_T=1
-weight=$3
-order=$4
-# image_feat=c4c_l${lambda}_it${inverse_T}_w${weight}_random_${order}
-image_feat=c4c_w${weight}_l${lambda}_it${inverse_T}_weighted_gaussian_dist2_${order}
-# image_feat=c4c_w${weight}_dist2_${order}
 
-task=opus-ja2en
 mask_data=mask0
 tag=$image_feat/$image_feat-$mask_data
 save_dir=checkpoints/$task/$tag
@@ -38,34 +33,28 @@ fi
 if [ $task == 'opus-ja2en' ]; then
 	src_lang=ja
 	tgt_lang=en
-	data_dir=opus.ja-en
-elif [ $task == 'opus-random-ja2en' ]; then
-	src_lang=ja
-	tgt_lang=en
-	data_dir=opus-random.ja-en
-elif [ $task == 'transet-ja2en' ]; then
-	src_lang=ja
-	tgt_lang=en
-	data_dir=transet.ja-en
+	data_dir=opus.ja-en-context
 elif [ $task == 'opus-zh2en' ]; then
 	src_lang=zh
 	tgt_lang=en
-	data_dir=opus.zh-en
+	data_dir=opus.zh-en-context
 fi
 
-decrease=0
-criterion=label_smoothed_cross_entropy_with_gaussian
-amp=0
+criterion=label_smoothed_cross_entropy
+fp16=0 #0
 lr=0.005
 warmup=2000
+max_tokens=4000
+# max_tokens=2000 # for videoMAE and i3d
+# max_tokens=8000 # for c4c
 update_freq=1
 keep_last_epochs=10
 max_update=800000
 dropout=0.3
 
-arch=image_multimodal_transformer_SA_top
-SA_attention_dropout=0.1
-SA_image_dropout=0.1
+arch=transformer_top
+# SA_attention_dropout=0.1
+# SA_image_dropout=0.1
 
 if [ $image_feat == "vit_tiny_patch16_384" ]; then
 	image_feat_path=data/$image_feat
@@ -79,32 +68,22 @@ elif [ $image_feat == "vit_base_patch16_384" ]; then
 elif [ $image_feat == "vit_large_patch16_384" ]; then
 	image_feat_path=data/$image_feat
 	image_feat_dim=1024
-elif [[ $image_feat == *"i3d"* ]] ; then
-# 	image_feat_path=/dataset/OpusEJ/OpusEJ_i3d_feature
-	if [[ $HOSTNAME == agni  ]]; then
-		image_feat_path=/data/OpusEJ_i3d_feature
-		echo "image_feat_path=$image_feat_path"
-	else
-		image_feat_path=/home/dataset/OpusEJ_i3d_feature
-	fi
+elif [ $image_feat == "i3d" ] || [ $image_feat == "i3d1" ]|| [ $image_feat == "i3d_random" ]|| [ $image_feat == "i3d_random1" ]; then
+	image_feat_path=/dataset/OpusEJ/OpusEJ_i3d_feature
 	image_feat_dim=2048 # (32, 2048)
 	image_feat_whole_dim="32 2048" # (32, 2048)
-elif [[ $image_feat == *"c4c"* ]]; then
-	if [[ $src_lang == "ja" ]]; then # ==前后要有空格
-		image_feat_path=/data/OpusEJ_c4c_feature
-	elif [[ $src_lang == "zh" ]]; then
-		image_feat_path=/data/OpusZE_c4c_feature
-	fi
-	echo "image_feat_path=$image_feat_path"
+elif [ $image_feat == "c4c" ] || [ $image_feat == "c4c_random" ]; then
+	image_feat_path=/dataset/OpusEJ/OpusEJ_c4c_feature
 	image_feat_dim=512
 	image_feat_whole_dim="12 512" # (12, 512)
-elif [[ $image_feat == *"videoMAE"* ]]; then
-	if [[ $HOSTNAME == agni  ||  $HOSTNAME == kubera  ||  $HOSTNAME == saffron4 ||  $HOSTNAME == saffron ||  $HOSTNAME == moss110 ]]; then
-		image_feat_path=/data/OpusEJ_videoMAE_feature_224
-		echo "image_feat_path=$image_feat_path"
-	fi
+elif [ $image_feat == "videoMAE" ] || [ $image_feat == "videoMAE_random" ]; then
+	image_feat_path=/dataset/OpusEJ/OpusEJ_videoMAE_feature_224
 	image_feat_dim=384
 	image_feat_whole_dim="1568 384" # (1568, 384)
+elif [ $image_feat == "nmt" ]; then
+	image_feat_path=/
+	image_feat_dim=0
+	image_feat_whole_dim="0 0" # (1568, 384)
 fi
 
 # multi-feature
@@ -115,7 +94,7 @@ cp ${BASH_SOURCE[0]} $save_dir/train.sh
 
 gpu_num=`echo "$device" | awk '{split($0,arr,",");print length(arr)}'`
 
-# export PYTHONPATH=$PYTHONPATH:/home/code/fairseq_mmt/fairseq
+# export PYTHONPATH=$PYTHONPATH:/home/code/fairseq_mmt_safa/fairseq
 # echo $PYTHONPATH
 #   --user-dir fairseq/tasks
 #   --share-all-embeddings
@@ -123,31 +102,25 @@ gpu_num=`echo "$device" | awk '{split($0,arr,",");print length(arr)}'`
 #   --find-unused-parameters
 #   --model-parallel-size
 #   --load-checkpoint-on-all-dp-ranks
-#   --data-buffer-size 1
 #   --restore-file checkpoints/opus-ja2en/i3d/i3d-mask0/checkpoint_best.pt
-#   --keep-best-epochs $keep_last_epochs
 cmd="fairseq-train data-bin/$data_dir
   --save-dir $save_dir
   --distributed-world-size $gpu_num -s $src_lang -t $tgt_lang
   --arch $arch
   --dropout $dropout
-  --criterion $criterion --label-smoothing 0.1 --balancing-lambda $lambda --inverse-softmax-tempreature $inverse_T --decrease-addictive-object $decrease --weight $weight
-  --task image_mmt --image-feat-path $image_feat_path --image-feat-dim $image_feat_dim
-  --image-feat-whole-dim $image_feat_whole_dim
+  --criterion $criterion --label-smoothing 0.1
+  --task translation 
   --optimizer adam --adam-betas '(0.9, 0.98)'
   --lr $lr --min-lr 1e-09 --lr-scheduler inverse_sqrt --warmup-init-lr 1e-07 --warmup-updates $warmup
   --max-tokens $max_tokens --update-freq $update_freq --max-update $max_update
   --patience $patience
   --keep-last-epochs $keep_last_epochs
   --num-workers 2
+  --reset-dataloader
   --log-interval 20"
 
 if [ $fp16 -eq 1 ]; then
 cmd=${cmd}" --fp16 "
-fi
-
-if [ $amp -eq 1 ]; then
-cmd=${cmd}" --amp "
 fi
 
 if [ -n "$SA_image_dropout" ]; then
@@ -161,5 +134,3 @@ export CUDA_VISIBLE_DEVICES=$device
 cmd="nohup "${cmd}" > $save_dir/train.log 2>&1 &"
 eval $cmd
 tail -f $save_dir/train.log
-
-

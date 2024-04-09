@@ -1,5 +1,5 @@
 # please see scripts/README.md firstly. 
-# python3 ~/code/fairseq_mmt/scripts/get_img_feat_opus.py --model vit_base_patch16_384 --ipath /OpusEJ_central_frame --opath /OpusEJ_central_frame_vit_feature
+# python3 ~/code/fairseq_mmt_safa/scripts/get_img_feat_opus.py --model vit_base_patch16_384 --ipath /OpusEJ_central_frame --opath /OpusEJ_central_frame_vit_feature
 import timm
 import os
 import torch

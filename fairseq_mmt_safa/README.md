@@ -1,6 +1,7 @@
 # SAFA Model
 
 **Note:** We are still organizing the code. The current version is for reference purpose only and **cannot** be directly used for training or inference.
+**Note:** For installation and usage of the project, it is recommended to refer to https://github.com/libeineu/fairseq_mmt which is our base
 
 ## 1. Python Environment
 The conda environment file `./env/environment.yaml` contains a list of packages. However, not all of these packages are necessary, as some may have been used for other experiments and are included for reference purposes only.

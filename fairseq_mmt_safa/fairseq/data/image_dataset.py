@@ -4,14 +4,14 @@ import numpy as np
 import random
 import json
  
-# For fairseq_mmt_video
+# For fairseq_mmt_safa_video
 class ImageDataset(torch.utils.data.Dataset):
     """
     For loading image datasets
     """
     def __init__(self, feat_path: str, split:str, mask_path: str, image_feat_dim: list):
         #######################
-        video_list_path=os.path.join("/home/code/fairseq_mmt/data/opus-ja-en", split+".video") 
+        video_list_path=os.path.join("/home/code/fairseq_mmt_safa/data/opus-ja-en", split+".video") 
         ######################
         videos=[]
         with open(video_list_path, 'r') as f:
