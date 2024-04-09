@@ -1,6 +1,6 @@
 # SAFA Model
 
-**Note:** We are still organizing the code. The current version is for reference purpose only and **cannot** be directly used for training or inference.
+**Note:** The current version is for reference purpose only and **cannot** be directly used for training or inference.
 **Note:** For installation and usage of the project, it is recommended to refer to https://github.com/libeineu/fairseq_mmt which is our base
 
 ## 1. Python Environment
